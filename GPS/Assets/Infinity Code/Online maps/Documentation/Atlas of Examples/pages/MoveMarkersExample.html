@@ -1,0 +1,141 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Animated moving the marker. Online Maps. Atlas of Examples</title>
+    <link href="https://fonts.googleapis.com/css?family=Encode+Sans+Expanded" rel="stylesheet"> 
+    <link rel="stylesheet" href="../styles/semantic.min.css">
+    <link rel="stylesheet" href="../styles/prism.css" data-noprefix />
+    <link href="../styles/page.css" rel="stylesheet" type="text/css">
+    <script src="../scripts/jquery-2.1.4.min.js"></script>
+    <script src="../scripts/semantic.min.js"></script>
+</head>
+<body>
+<div class="ui fixed inverted menu">
+    <div class="ui container">
+        <a class="header item" href="../index.html">Online Maps v3.0. Atlas of Examples</a>
+    </div>
+</div>
+<div class="ui main container">
+    <h2 class="ui dividing header">Animated moving the marker</h2>
+    <div class="ui container">
+        <a class="ui basic labeled icon button" href="../index.html">
+            <i class="left chevron icon"></i>Back
+        </a>
+    </div>
+    <div class="ui vertical segment five column stackable grid item-row">
+    	<div style="display:table; padding-top:10px; margin-bottom: 10px;">
+    	    <div style="display:table-cell"><img src="../images/animationMovingMarker.png"/></div>
+            <div class="example-info" style="display:table-cell; vertical-align:top; padding-left:20px; width:100%;">
+            <div class="item-row-tags">
+    <div style="font-weight:bold">Tags: </div>
+    <div class="item-row-tag">Marker</div><div class="item-row-tag">Marker 2D</div>
+</div>
+        	<div>Example of an animated marker moving between locations.</div>
+            
+            <div class="instructions"><strong>Usage instructions:</strong><br/>Add this script to map GameObject and start the scene.<br/>The marker will move smoothly between the locations.</div>
+        </div>
+    </div>
+    <div class="code-file">
+    <div class="filename">MoveMarkersExample.cs</div>
+    <div class="code">
+	<div class="code-col"></div>
+        <div class="code-col"></div>
+       <pre><code class="language-csharp line-numbers">/*     INFINITY CODE 2013-2019      */
+/*   http://www.infinity-code.com   */
+
+using UnityEngine;
+
+namespace InfinityCode.OnlineMapsExamples
+{
+    /// &lt;summary&gt;
+    /// Example of an animated marker moving between locations.
+    /// &lt;/summary&gt;
+    [AddComponentMenu("Infinity Code/Online Maps/Examples (API Usage)/MoveMarkersExample")]
+    public class MoveMarkersExample : MonoBehaviour
+    {
+        // Move time
+        public float time = 10;
+
+        private OnlineMapsMarker marker;
+
+        private Vector2 fromPosition;
+        private Vector2 toPosition;
+
+        // Relative position (0-1) between from and to
+        private float angle = 0.5f;
+
+        // Move direction
+        private int direction = 1;
+
+        private void Start()
+        {
+            OnlineMaps map = OnlineMaps.instance;
+            marker = OnlineMapsMarkerManager.CreateItem(map.position);
+            fromPosition = map.topLeftPosition;
+            toPosition = map.bottomRightPosition;
+        }
+
+        private void Update()
+        {
+            angle += Time.deltaTime / time * direction;
+            if (angle &gt; 1)
+            {
+                angle = 2 - angle;
+                direction = -1;
+            }
+            else if (angle &lt; 0)
+            {
+                angle *= -1;
+                direction = 1;
+            }
+
+            // Set new position
+            marker.position = Vector2.Lerp(fromPosition, toPosition, angle);
+
+            // Marks the map should be redrawn.
+            // Map is not redrawn immediately. It will take some time.
+            OnlineMaps.instance.Redraw();
+        }
+    }
+}</code></pre>
+    </div>
+</div>
+</div>
+<script src="../scripts/prism.js"></script>
+
+<!-- Yandex.Metrika counter --><script type="text/javascript">(function (d, w, c) { (w[c] = w[c] || []).push(function() { try { w.yaCounter20147287 = new Ya.Metrika({id:20147287, webvisor:true, clickmap:true, trackLinks:true, accurateTrackBounce:true}); } catch(e) { } }); var n = d.getElementsByTagName("script")[0], s = d.createElement("script"), f = function () { n.parentNode.insertBefore(s, n); }; s.type = "text/javascript"; s.async = true; s.src = (d.location.protocol == "https:" ? "https:" : "http:") + "//mc.yandex.ru/metrika/watch.js"; if (w.opera == "[object Opera]") { d.addEventListener("DOMContentLoaded", f, false); } else { f(); } })(document, window, "yandex_metrika_callbacks");</script><noscript><div><img src="//mc.yandex.ru/watch/20147287" style="position:absolute; left:-9999px;" alt="" /></div></noscript><!-- /Yandex.Metrika counter -->
+
+
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-38709536-1']);
+  _gaq.push(['_setDomainName', 'infinity-code.com']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+
+<!-- Rating@Mail.ru counter -->
+<script type="text/javascript">//<![CDATA[
+var _tmr = _tmr || [];
+_tmr.push({id: "2408482", type: "pageView", start: (new Date()).getTime()});
+(function (d, w) {
+   var ts = d.createElement("script"); ts.type = "text/javascript"; ts.async = true;
+   ts.src = (d.location.protocol == "https:" ? "https:" : "http:") + "//top-fwz1.mail.ru/js/code.js";
+   var f = function () {var s = d.getElementsByTagName("script")[0]; s.parentNode.insertBefore(ts, s);};
+   if (w.opera == "[object Opera]") { d.addEventListener("DOMContentLoaded", f, false); } else { f(); }
+})(document, window);
+//]]></script><noscript><div style="position:absolute;left:-10000px;">
+<img src="//top-fwz1.mail.ru/counter?id=2408482;js=na" style="border:0;" height="1" width="1" alt="�������@Mail.ru" />
+</div></noscript>
+<!-- //Rating@Mail.ru counter -->
+
+</body>
+</html>

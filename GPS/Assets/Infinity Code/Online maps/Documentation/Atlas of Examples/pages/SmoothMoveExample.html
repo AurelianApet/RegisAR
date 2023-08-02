@@ -1,0 +1,172 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Smooth movement to GPS location. Online Maps. Atlas of Examples</title>
+    <link href="https://fonts.googleapis.com/css?family=Encode+Sans+Expanded" rel="stylesheet"> 
+    <link rel="stylesheet" href="../styles/semantic.min.css">
+    <link rel="stylesheet" href="../styles/prism.css" data-noprefix />
+    <link href="../styles/page.css" rel="stylesheet" type="text/css">
+    <script src="../scripts/jquery-2.1.4.min.js"></script>
+    <script src="../scripts/semantic.min.js"></script>
+</head>
+<body>
+<div class="ui fixed inverted menu">
+    <div class="ui container">
+        <a class="header item" href="../index.html">Online Maps v3.0. Atlas of Examples</a>
+    </div>
+</div>
+<div class="ui main container">
+    <h2 class="ui dividing header">Smooth movement to GPS location</h2>
+    <div class="ui container">
+        <a class="ui basic labeled icon button" href="../index.html">
+            <i class="left chevron icon"></i>Back
+        </a>
+    </div>
+    <div class="ui vertical segment five column stackable grid item-row">
+    	<div style="display:table; padding-top:10px; margin-bottom: 10px;">
+    	    <div style="display:table-cell"><img src="../images/smoothMoveToGPS.png"/></div>
+            <div class="example-info" style="display:table-cell; vertical-align:top; padding-left:20px; width:100%;">
+            <div class="item-row-tags">
+    <div style="font-weight:bold">Tags: </div>
+    <div class="item-row-tag">GPS</div><div class="item-row-tag">Location Service</div>
+</div>
+        	<div>Example of a smooth movement to current GPS location.</div>
+            <div class="requirement"><strong>Requirement:</strong> Location Service Component</div>
+            <div class="instructions"><strong>Usage instructions:</strong><br/>Add this script to map GameObject and start the scene.<br/>Click Goto marker, to smoothly move to the marker.</div>
+        </div>
+    </div>
+    <div class="code-file">
+    <div class="filename">SmoothMoveExample.cs</div>
+    <div class="code">
+	<div class="code-col"></div>
+        <div class="code-col"></div>
+       <pre><code class="language-csharp line-numbers">/*     INFINITY CODE 2013-2019      */
+/*   http://www.infinity-code.com   */
+
+using UnityEngine;
+
+namespace InfinityCode.OnlineMapsExamples
+{
+    /// &lt;summary&gt;
+    /// Example of a smooth movement to current GPS location.
+    /// &lt;/summary&gt;
+    [AddComponentMenu("Infinity Code/Online Maps/Examples (API Usage)/SmoothMoveExample")]
+    public class SmoothMoveExample : MonoBehaviour
+    {
+        /// &lt;summary&gt;
+        /// Move duration (sec)
+        /// &lt;/summary&gt;
+        public float time = 3;
+
+        /// &lt;summary&gt;
+        /// Relative position (0-1) between from and to
+        /// &lt;/summary&gt;
+        private float angle;
+
+        /// &lt;summary&gt;
+        /// Movement trigger
+        /// &lt;/summary&gt;
+        private bool isMovement;
+
+        private Vector2 fromPosition;
+        private Vector2 toPosition;
+        private double fromTileX, fromTileY, toTileX, toTileY;
+        private int moveZoom;
+
+
+        private void OnGUI()
+        {
+            // On click button, starts movement
+            if (GUI.Button(new Rect(5, 5, 100, 30), "Goto marker"))
+            {
+                // from current map position
+                fromPosition = OnlineMaps.instance.position;
+
+                // to GPS position;
+                toPosition = OnlineMapsLocationService.instance.position;
+
+                // calculates tile positions
+                moveZoom = OnlineMaps.instance.zoom;
+                OnlineMaps.instance.projection.CoordinatesToTile(fromPosition.x, fromPosition.y, moveZoom, out fromTileX, out fromTileY);
+                OnlineMaps.instance.projection.CoordinatesToTile(toPosition.x, toPosition.y, moveZoom, out toTileX, out toTileY);
+
+                // if tile offset &lt; 4, then start smooth movement
+                if (OnlineMapsUtils.Magnitude(fromTileX, fromTileY, toTileX, toTileY) &lt; 4)
+                {
+                    // set relative position 0
+                    angle = 0;
+
+                    // start movement
+                    isMovement = true;
+                }
+                else // too far
+                {
+                    OnlineMaps.instance.position = toPosition;
+                }
+            }
+        }
+
+        private void Update()
+        {
+            // if not movement then return
+            if (!isMovement) return;
+
+            // update relative position
+            angle += Time.deltaTime / time;
+
+            if (angle &gt; 1)
+            {
+                // stop movement
+                isMovement = false;
+                angle = 1;
+            }
+
+            // Set new position
+            double px = (toTileX - fromTileX) * angle + fromTileX;
+            double py = (toTileY - fromTileY) * angle + fromTileY;
+            OnlineMaps.instance.projection.TileToCoordinates(px, py, moveZoom, out px, out py);
+            OnlineMaps.instance.SetPosition(px, py);
+        }
+    }
+}</code></pre>
+    </div>
+</div>
+</div>
+<script src="../scripts/prism.js"></script>
+
+<!-- Yandex.Metrika counter --><script type="text/javascript">(function (d, w, c) { (w[c] = w[c] || []).push(function() { try { w.yaCounter20147287 = new Ya.Metrika({id:20147287, webvisor:true, clickmap:true, trackLinks:true, accurateTrackBounce:true}); } catch(e) { } }); var n = d.getElementsByTagName("script")[0], s = d.createElement("script"), f = function () { n.parentNode.insertBefore(s, n); }; s.type = "text/javascript"; s.async = true; s.src = (d.location.protocol == "https:" ? "https:" : "http:") + "//mc.yandex.ru/metrika/watch.js"; if (w.opera == "[object Opera]") { d.addEventListener("DOMContentLoaded", f, false); } else { f(); } })(document, window, "yandex_metrika_callbacks");</script><noscript><div><img src="//mc.yandex.ru/watch/20147287" style="position:absolute; left:-9999px;" alt="" /></div></noscript><!-- /Yandex.Metrika counter -->
+
+
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-38709536-1']);
+  _gaq.push(['_setDomainName', 'infinity-code.com']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+
+<!-- Rating@Mail.ru counter -->
+<script type="text/javascript">//<![CDATA[
+var _tmr = _tmr || [];
+_tmr.push({id: "2408482", type: "pageView", start: (new Date()).getTime()});
+(function (d, w) {
+   var ts = d.createElement("script"); ts.type = "text/javascript"; ts.async = true;
+   ts.src = (d.location.protocol == "https:" ? "https:" : "http:") + "//top-fwz1.mail.ru/js/code.js";
+   var f = function () {var s = d.getElementsByTagName("script")[0]; s.parentNode.insertBefore(ts, s);};
+   if (w.opera == "[object Opera]") { d.addEventListener("DOMContentLoaded", f, false); } else { f(); }
+})(document, window);
+//]]></script><noscript><div style="position:absolute;left:-10000px;">
+<img src="//top-fwz1.mail.ru/counter?id=2408482;js=na" style="border:0;" height="1" width="1" alt="�������@Mail.ru" />
+</div></noscript>
+<!-- //Rating@Mail.ru counter -->
+
+</body>
+</html>

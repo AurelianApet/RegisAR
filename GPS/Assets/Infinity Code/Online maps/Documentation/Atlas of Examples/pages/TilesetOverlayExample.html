@@ -1,0 +1,206 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Overlay in tileset. Online Maps. Atlas of Examples</title>
+    <link href="https://fonts.googleapis.com/css?family=Encode+Sans+Expanded" rel="stylesheet"> 
+    <link rel="stylesheet" href="../styles/semantic.min.css">
+    <link rel="stylesheet" href="../styles/prism.css" data-noprefix />
+    <link href="../styles/page.css" rel="stylesheet" type="text/css">
+    <script src="../scripts/jquery-2.1.4.min.js"></script>
+    <script src="../scripts/semantic.min.js"></script>
+</head>
+<body>
+<div class="ui fixed inverted menu">
+    <div class="ui container">
+        <a class="header item" href="../index.html">Online Maps v3.0. Atlas of Examples</a>
+    </div>
+</div>
+<div class="ui main container">
+    <h2 class="ui dividing header">Overlay in tileset</h2>
+    <div class="ui container">
+        <a class="ui basic labeled icon button" href="../index.html">
+            <i class="left chevron icon"></i>Back
+        </a>
+    </div>
+    <div class="ui vertical segment five column stackable grid item-row">
+    	<div style="display:table; padding-top:10px; margin-bottom: 10px;">
+    	    <div style="display:table-cell"><img src="../images/tilesetOverlay.png"/></div>
+            <div class="example-info" style="display:table-cell; vertical-align:top; padding-left:20px; width:100%;">
+            <div class="item-row-tags">
+    <div style="font-weight:bold">Tags: </div>
+    <div class="item-row-tag">Tileset</div><div class="item-row-tag">Overlay</div>
+</div>
+        	<div>Example of how to make the overlay for the tileset.</div>
+            <div class="requirement"><strong>Requirement:</strong> Tileset Control</div>
+            <div class="instructions"><strong>Usage instructions:</strong><br/>Add this script to map GameObject, select overlay texture and start the scene.<br/>Over a map will be displayed overlay.</div>
+        </div>
+    </div>
+    <div class="code-file">
+    <div class="filename">TilesetOverlayExample.cs</div>
+    <div class="code">
+	<div class="code-col"></div>
+        <div class="code-col"></div>
+       <pre><code class="language-csharp line-numbers">/*     INFINITY CODE 2013-2019      */
+/*   http://www.infinity-code.com   */
+
+using System;
+using UnityEngine;
+
+namespace InfinityCode.OnlineMapsExamples
+{
+    /// &lt;summary&gt;
+    /// Example of how to make the overlay for the tileset.
+    /// &lt;/summary&gt;
+    [AddComponentMenu("Infinity Code/Online Maps/Examples (API Usage)/TilesetOverlayExample")]
+    public class TilesetOverlayExample : MonoBehaviour
+    {
+        // Overlay texture in mercator projection
+        public Texture texture;
+
+        // Overlay transparency
+        [Range(0, 1)] public float alpha = 1;
+
+        private Mesh overlayMesh;
+        private Material material;
+        private Collider tilesetCollider;
+
+        private void Start()
+        {
+            // Create overlay container
+            GameObject overlayContainer = new GameObject("OverlayContainer");
+            overlayContainer.transform.parent = transform;
+
+            // Init overlay material
+            MeshRenderer meshRenderer = overlayContainer.AddComponent&lt;MeshRenderer&gt;();
+            MeshFilter meshFilter = overlayContainer.AddComponent&lt;MeshFilter&gt;();
+            material = new Material(Shader.Find("Transparent/Diffuse"));
+            material.mainTexture = texture;
+            meshRenderer.sharedMaterial = material;
+
+            overlayMesh = meshFilter.sharedMesh = new Mesh();
+            overlayMesh.name = "Overlay Mesh";
+            overlayMesh.MarkDynamic();
+            overlayMesh.vertices = new Vector3[4];
+
+            // Subscribe to events
+            OnlineMaps.instance.OnChangePosition += UpdateMesh;
+            OnlineMaps.instance.OnChangeZoom += UpdateMesh;
+
+            // Init mesh
+            UpdateMesh();
+        }
+
+        private void UpdateMesh()
+        {
+            OnlineMapsTileSetControl control = OnlineMapsTileSetControl.instance;
+            if (tilesetCollider == null) tilesetCollider = control.GetComponent&lt;Collider&gt;();
+            Bounds bounds = tilesetCollider.bounds;
+
+            // Clear overlay mesh
+            overlayMesh.Clear(true);
+
+            // Init vertices and normals
+            float y = bounds.max.y + 0.5f;
+            overlayMesh.vertices = new[]
+            {
+                new Vector3(bounds.min.x, y, bounds.min.z),
+                new Vector3(bounds.min.x, y, bounds.max.z),
+                new Vector3(bounds.max.x, y, bounds.max.z),
+                new Vector3(bounds.max.x, y, bounds.min.z)
+            };
+
+            overlayMesh.normals = new[]
+            {
+                Vector3.up,
+                Vector3.up,
+                Vector3.up,
+                Vector3.up
+            };
+
+            // Init overlay UV
+            OnlineMaps map = OnlineMaps.instance;
+
+            double tlx, tly, brx, bry;
+            map.GetTileCorners(out tlx, out tly, out brx, out bry);
+
+            int maxTileCount = 1 &lt;&lt; map.zoom;
+
+            float uvX1 = (float)(tlx / maxTileCount);
+            float uvX2 = (float)(brx / maxTileCount);
+
+            if (uvX1 &gt; uvX2) uvX2 += 1;
+
+            float uvY1 = (float)(1 - tly / maxTileCount);
+            float uvY2 = (float)(1 - bry / maxTileCount);
+
+            overlayMesh.uv = new[]
+            {
+                new Vector2(uvX2, uvY1),
+                new Vector2(uvX2, uvY2),
+                new Vector2(uvX1, uvY2),
+                new Vector2(uvX1, uvY1)
+            };
+
+            // Init triangles
+            overlayMesh.SetTriangles(new[]
+            {
+                0, 1, 2,
+                0, 2, 3
+            }, 0);
+
+            overlayMesh.RecalculateBounds();
+            overlayMesh.RecalculateNormals();
+        }
+
+        private void Update()
+        {
+            if (Math.Abs(material.color.a - alpha) &gt; float.Epsilon)
+            {
+                Color color = material.color;
+                color.a = alpha;
+                material.color = color;
+            }
+        }
+    }
+}</code></pre>
+    </div>
+</div>
+</div>
+<script src="../scripts/prism.js"></script>
+
+<!-- Yandex.Metrika counter --><script type="text/javascript">(function (d, w, c) { (w[c] = w[c] || []).push(function() { try { w.yaCounter20147287 = new Ya.Metrika({id:20147287, webvisor:true, clickmap:true, trackLinks:true, accurateTrackBounce:true}); } catch(e) { } }); var n = d.getElementsByTagName("script")[0], s = d.createElement("script"), f = function () { n.parentNode.insertBefore(s, n); }; s.type = "text/javascript"; s.async = true; s.src = (d.location.protocol == "https:" ? "https:" : "http:") + "//mc.yandex.ru/metrika/watch.js"; if (w.opera == "[object Opera]") { d.addEventListener("DOMContentLoaded", f, false); } else { f(); } })(document, window, "yandex_metrika_callbacks");</script><noscript><div><img src="//mc.yandex.ru/watch/20147287" style="position:absolute; left:-9999px;" alt="" /></div></noscript><!-- /Yandex.Metrika counter -->
+
+
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-38709536-1']);
+  _gaq.push(['_setDomainName', 'infinity-code.com']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+
+<!-- Rating@Mail.ru counter -->
+<script type="text/javascript">//<![CDATA[
+var _tmr = _tmr || [];
+_tmr.push({id: "2408482", type: "pageView", start: (new Date()).getTime()});
+(function (d, w) {
+   var ts = d.createElement("script"); ts.type = "text/javascript"; ts.async = true;
+   ts.src = (d.location.protocol == "https:" ? "https:" : "http:") + "//top-fwz1.mail.ru/js/code.js";
+   var f = function () {var s = d.getElementsByTagName("script")[0]; s.parentNode.insertBefore(ts, s);};
+   if (w.opera == "[object Opera]") { d.addEventListener("DOMContentLoaded", f, false); } else { f(); }
+})(document, window);
+//]]></script><noscript><div style="position:absolute;left:-10000px;">
+<img src="//top-fwz1.mail.ru/counter?id=2408482;js=na" style="border:0;" height="1" width="1" alt="�������@Mail.ru" />
+</div></noscript>
+<!-- //Rating@Mail.ru counter -->
+
+</body>
+</html>
